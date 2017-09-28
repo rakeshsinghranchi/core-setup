@@ -1,0 +1,26 @@
+name: dotnetapp-consumer
+version: '0.1' 
+summary: This is a sample dotnet 2.0.0 application consuming dotnet-runtime plug  summary
+description: |
+  This is a sample dotnet 2.0.0 application
+
+grade: devel 
+confinement: devmode 
+
+apps:
+  dotnetapp-consumer: 
+    command: env $SNAP/dotnet-runtime/dotnet $SNAP/dotnetapp-consumer.dll
+    
+plugs:
+  # Mount the content shared from dotnet-runtime into $SNAP/dotnet-runtime
+  dotnet-runtime:
+    content: dotnet-runtime
+    interface: content
+    target: /dotnet-runtime
+
+parts:
+  dotnetapp:
+    # See 'snapcraft plugins'
+    plugin: dotnet
+    build-attributes: [no-runtime]
+    source: .

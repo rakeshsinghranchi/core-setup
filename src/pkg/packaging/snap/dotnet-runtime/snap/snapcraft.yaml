@@ -1,0 +1,35 @@
+name: dotnet-runtime
+version: 2.0.0
+summary: Cross-Platform .NET Core Runtime
+description: |
+  Contains.NET Core 2.0.0 Runtime 
+
+grade: devel
+confinement: devmode
+
+slots:
+  # This is how we make a part of this snap readable by other
+  # snaps. Consumers will need to access the runtime as well
+  # as various libs contained in this snap, so share the entire
+  # $SNAP
+  dotnet-runtime:
+    content: dotnet-runtime
+    interface: content
+    read: [/]
+
+parts:
+  dotnet-runtime:
+      plugin: dump
+      source: http://dotnetcli.blob.core.windows.net/dotnet/Runtime/2.0.0/dotnet-runtime-2.0.0-linux-x64.tar.gz
+      stage-packages:
+        - libicu55
+        - libssl1.0.0
+        - libc6
+        - libcurl3
+        - libgssapi-krb5-2
+        - liblttng-ust0
+        - libstdc++6
+        - zlib1g
+        - libgcc1
+        - lldb
+        - libunwind8
