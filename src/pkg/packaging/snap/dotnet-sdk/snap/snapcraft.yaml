@@ -29,6 +29,7 @@ parts:
         - zlib1g
         - libgcc1
         - lldb
+        - libunwind8
 
 
 
