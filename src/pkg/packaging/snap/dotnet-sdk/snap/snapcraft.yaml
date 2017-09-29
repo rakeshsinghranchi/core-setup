@@ -2,22 +2,24 @@ name: dotnet-sdk
 version: 2.0.0
 summary: Cross-Platform .NET Core SDK
 description: |
-  .NET Core 2.0.0 SDK
+  .NET Core 2.0.0 SDK. https://dot.net/core.
 
 grade: devel
 confinement: devmode
 
 apps:
   dotnet-sdk:
-    command: env $SNAP/dotnet
+    command: dotnet
     plugs:
       - network
+      - network-bind
       - removable-media
       - home
 parts:
   dotnet-sdk:
       plugin: dump
       source: http://dotnetcli.blob.core.windows.net/dotnet/Sdk/2.0.0/dotnet-sdk-2.0.0-linux-x64.tar.gz
+      source-checksum: sha256/6059a6f72fb7aa6205ef4b52583e9c041fd128e768870a0fc4a33ed84c98ca6b
       stage-packages:
         - libicu55
         - libssl1.0.0
@@ -29,6 +31,7 @@ parts:
         - zlib1g
         - libgcc1
         - lldb
+        - libunwind8
 
 
 
