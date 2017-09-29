@@ -1,4 +1,4 @@
-name: dotnet-sdk
+name: dotnet
 version: 2.0.0
 summary: Cross-Platform .NET Core SDK
 description: |
@@ -9,13 +9,13 @@ confinement: devmode
 
 apps:
   dotnet-sdk:
-    command: env $SNAP/dotnet
+    command: dotnet
     plugs:
       - network
       - removable-media
       - home
 parts:
-  dotnet-sdk:
+  dotnet:
       plugin: dump
       source: http://dotnetcli.blob.core.windows.net/dotnet/Sdk/2.0.0/dotnet-sdk-2.0.0-linux-x64.tar.gz
       stage-packages:
