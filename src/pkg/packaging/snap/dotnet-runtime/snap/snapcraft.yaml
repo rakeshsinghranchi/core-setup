@@ -1,11 +1,20 @@
 name: dotnet-runtime
 version: 2.0.0
-summary: Cross-Platform .NET Core Runtime
+summary: Cross-Platform .NET Core Runtime. 
 description: |
-  Contains.NET Core 2.0.0 Runtime 
+  .NET Core 2.0.0 Runtime. https://dot.net/core.
 
 grade: devel
 confinement: devmode
+
+apps:
+  dotnet:
+    command: dotnet
+    plugs:
+      - network
+      - network-bind
+      - removable-media
+      - home
 
 slots:
   # This is how we make a part of this snap readable by other
@@ -21,6 +30,7 @@ parts:
   dotnet-runtime:
       plugin: dump
       source: http://dotnetcli.blob.core.windows.net/dotnet/Runtime/2.0.0/dotnet-runtime-2.0.0-linux-x64.tar.gz
+      source-checksum: sha256/69ecad24bce4f2132e0db616b49e2c35487d13e3c379dabc3ec860662467b714
       stage-packages:
         - libicu55
         - libssl1.0.0
