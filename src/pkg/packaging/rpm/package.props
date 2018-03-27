@@ -14,4 +14,14 @@
     <TemplatesDir>$(MSBuildThisFileDirectory)/templates</TemplatesDir>
     <ScriptsDir>$(MSBuildThisFileDirectory)/scripts</ScriptsDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(BuildUpgradeableLinuxPackages)' == 'true'">
+    <PackageNameSuffix>$(MajorVersion).$(MinorVersion)</PackageNameSuffix>
+    
+    <HostFxrRpmPkgName>dotnet-hostfxr-$(PackageNameSuffix)</HostFxrRpmPkgName>
+    <HostFxrRpmPkgName>$(HostFxrRpmPkgName.ToLower())</HostFxrRpmPkgName>
+    <SharedFxRpmPkgName>dotnet-runtime-$(PackageNameSuffix)</SharedFxRpmPkgName>
+    <SharedFxRpmPkgName>$(SharedFxRpmPkgName.ToLower())</SharedFxRpmPkgName>
+    <RuntimeDependenciesRpmPkgName>$(DotnetRuntimeDependenciesPackageString)$(PackageNameSuffix)</RuntimeDependenciesRpmPkgName>
+    <RuntimeDependenciesRpmPkgName>$(RuntimeDependenciesRpmPkgName.ToLower())</RuntimeDependenciesRpmPkgName>
+  </PropertyGroup>
 </Project>
