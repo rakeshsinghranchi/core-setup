@@ -23,5 +23,11 @@
     <SharedFxRpmPkgName>$(SharedFxRpmPkgName.ToLower())</SharedFxRpmPkgName>
     <RuntimeDependenciesRpmPkgName>$(DotnetRuntimeDependenciesPackageString)$(PackageNameSuffix)</RuntimeDependenciesRpmPkgName>
     <RuntimeDependenciesRpmPkgName>$(RuntimeDependenciesRpmPkgName.ToLower())</RuntimeDependenciesRpmPkgName>
+    
+    <HostResolverVersion Condition="$(HostResolverVersion.Contains('$(PreReleaseLabel)')) AND $(PreReleaseLabel) !=''">$([System.String]::Copy('$(HostResolverVersion)').Replace('-$(PreReleaseLabel)', '~$(PreReleaseLabel)'))</HostResolverVersion>
+    <HostVersion Condition="$(HostVersion.Contains('$(PreReleaseLabel)')) AND $(PreReleaseLabel) !=''">$([System.String]::Copy('$(HostVersion)').Replace('-$(PreReleaseLabel)', '~$(PreReleaseLabel)'))</HostVersion>
+    <SharedFrameworkNugetVersion Condition="$(SharedFrameworkNugetVersion.Contains('$(PreReleaseLabel)')) AND $(PreReleaseLabel) !=''">$([System.String]::Copy('$(SharedFrameworkNugetVersion)').Replace('-$(PreReleaseLabel)', '~$(PreReleaseLabel)'))</SharedFrameworkNugetVersion>
+    <RuntimeDepsRpmVersion Condition="$(RuntimeDepsRpmVersion.Contains('$(PreReleaseLabel)')) AND $(PreReleaseLabel) !=''">$([System.String]::Copy('$(RuntimeDepsRpmVersion)').Replace('-$(PreReleaseLabel)', '~$(PreReleaseLabel)'))</RuntimeDepsRpmVersion>
+
   </PropertyGroup>
 </Project>
