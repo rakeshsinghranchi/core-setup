@@ -7,7 +7,7 @@
     <consumingProjectDirectory>$(IntermediateOutputRootPath)$(toolConsumerProjectName)</consumingProjectDirectory>
     <debPackaginfConfigPath>$(PackagingRoot)deb/</debPackaginfConfigPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(BuildUpgradeableLinuxPackages)' == 'true'">
+  <PropertyGroup Condition="'$(BuildUpgradeableLinuxPackages)' == 'true' AND '$(InstallerExtension)' == '.deb'">
     <HostResolverVersion Condition="$(HostResolverVersion.Contains('$(PreReleaseLabel)')) AND $(PreReleaseLabel) !=''">$([System.String]::Copy('$(HostResolverVersion)').Replace('-$(PreReleaseLabel)', '~$(PreReleaseLabel)'))</HostResolverVersion>
     <HostVersion Condition="$(HostVersion.Contains('$(PreReleaseLabel)')) AND $(PreReleaseLabel) !=''">$([System.String]::Copy('$(HostVersion)').Replace('-$(PreReleaseLabel)', '~$(PreReleaseLabel)'))</HostVersion>
     <SharedFrameworkNugetVersion Condition="$(SharedFrameworkNugetVersion.Contains('$(PreReleaseLabel)')) AND $(PreReleaseLabel) !=''">$([System.String]::Copy('$(SharedFrameworkNugetVersion)').Replace('-$(PreReleaseLabel)', '~$(PreReleaseLabel)'))</SharedFrameworkNugetVersion>

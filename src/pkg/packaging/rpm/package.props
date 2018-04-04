@@ -14,7 +14,7 @@
     <TemplatesDir>$(MSBuildThisFileDirectory)/templates</TemplatesDir>
     <ScriptsDir>$(MSBuildThisFileDirectory)/scripts</ScriptsDir>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(BuildUpgradeableLinuxPackages)' == 'true'">
+  <PropertyGroup Condition="'$(BuildUpgradeableLinuxPackages)' == 'true' AND '$(InstallerExtension)' == '.rpm'">
     <PackageNameSuffix>$(MajorVersion).$(MinorVersion)</PackageNameSuffix>
     
     <HostFxrRpmPkgName>dotnet-hostfxr-$(PackageNameSuffix)</HostFxrRpmPkgName>
