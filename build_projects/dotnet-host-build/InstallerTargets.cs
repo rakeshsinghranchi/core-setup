@@ -13,7 +13,6 @@ namespace Microsoft.DotNet.Host.Build
             return c.Success();
         }
 
-        [Target(nameof(DebTargets.TestDebInstaller))]
         public static BuildTargetResult TestInstaller(BuildTargetContext c)
 
         {
