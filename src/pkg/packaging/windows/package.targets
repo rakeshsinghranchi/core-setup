@@ -39,11 +39,11 @@
                                  DestinationDirectory="$(WixToolsDir)"
                                  OverwriteDestination="false" />
 
-      <GenerateGuidFromName Name="$(SharedHostInstallerFile)">
+      <GenerateGuidFromName Name="$(SharedHostPackageName)">
         <Output TaskParameter="GeneratedGui" PropertyName="SharedHostUpgradeCode" />
       </GenerateGuidFromName>
 
-      <GenerateGuidFromName Name="$(HostFxrInstallerFile)">
+      <GenerateGuidFromName Name="$(HostFxrPackageName)">
         <Output TaskParameter="GeneratedGui" PropertyName="HostFxrUpgradeCode" />
       </GenerateGuidFromName>
 
@@ -71,7 +71,7 @@
       <RemoveDir Directories="$(WixObjRoot)" />
       <MakeDir Directories="$(WixObjRoot);@(WixOutputs);@(WixOutputs2)" />
 
-      <GenerateGuidFromName Name="$(SharedFrameworkInstallerFile)">
+      <GenerateGuidFromName Name="$(SharedFrameworkPackageName)">
         <Output TaskParameter="GeneratedGui" PropertyName="SharedFxUpgradeCode" />
       </GenerateGuidFromName>
 
