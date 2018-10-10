@@ -38,5 +38,10 @@
         "Name": "Microsoft.NETCore.App",
         "Description": "A set of .NET API's that are included in the default .NET Core application model.",
         "CommonTypes": [ ]
+    },
+    {
+        "Name": "Microsoft.NETCore.App.Ref",
+        "Description": "A set of .NET API's that are included in the default .NET Core application model. This is for Reference Assembly only.",
+        "CommonTypes": [ ]
     }
 ]
