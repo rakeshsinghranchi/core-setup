@@ -39,11 +39,11 @@
                                  DestinationDirectory="$(WixToolsDir)"
                                  OverwriteDestination="false" />
 
-      <GenerateGuidFromName Name="$(SharedHostPackageName)">
+      <GenerateGuidFromName Name="$(SharedHostPackageMajorMinor)">
         <Output TaskParameter="GeneratedGui" PropertyName="SharedHostUpgradeCode" />
       </GenerateGuidFromName>
 
-      <GenerateGuidFromName Name="$(HostFxrPackageName)">
+      <GenerateGuidFromName Name="$(HostFxrPackageMajorMinor)">
         <Output TaskParameter="GeneratedGui" PropertyName="HostFxrUpgradeCode" />
       </GenerateGuidFromName>
 
@@ -70,8 +70,9 @@
 
       <RemoveDir Directories="$(WixObjRoot)" />
       <MakeDir Directories="$(WixObjRoot);@(WixOutputs);@(WixOutputs2)" />
+      <Message Importance="High" Text="SharedFrameworkMajorMinor value:'$(SharedFrameworkPackageMajorMinor)')" />
 
-      <GenerateGuidFromName Name="$(SharedFrameworkPackageName)">
+      <GenerateGuidFromName Name="$(SharedFrameworkPackageMajorMinor)">
         <Output TaskParameter="GeneratedGui" PropertyName="SharedFxUpgradeCode" />
       </GenerateGuidFromName>
 
@@ -99,7 +100,7 @@
         <ArchParams>"$(MsiArch)" "$(TargetArchitecture)"</ArchParams>
      </PropertyGroup>
 
-     <GenerateGuidFromName Name="$(SharedBundle)">
+     <GenerateGuidFromName Name="$(SharedFrameworkCombinedPackageMajorMinor)">
        <Output TaskParameter="GeneratedGui" PropertyName="SharedBundleCode" />
      </GenerateGuidFromName>
 
