@@ -1,0 +1,115 @@
+parameters:
+  pool: {}
+  variables: {}
+
+jobs:
+- job: Finalize_Publish
+  pool: ${{ parameters.pool }}
+  variables: 
+    BuildArguments: -ConfigurationGroup=$(BuildConfiguration) $(AdditionalBuildArguments)
+
+  steps:
+  - task: MSBuild@1
+    displayName: Initialize tooling
+    inputs: 
+      solution: $(Build.SourcesDirectory)\build.proj
+      platform: $(TargetArchitecture)
+      configuration: $(BuildConfiguration)
+      msbuildVersion: 15.0
+      msbuildArchitecture: $(TargetArchitecture)
+      msbuildArguments: '/t:BuildTraversalBuildDependencies'
+    condition: succeeded()
+- task: MSBuild@1
+    displayName: Publish (no PublishType)
+    inputs: 
+      solution: $(Build.SourcesDirectory)\publish\publish.proj
+      platform: $(TargetArchitecture)
+      configuration: $(BuildConfiguration)
+      msbuildVersion: 15.0
+      msbuildArchitecture: $(TargetArchitecture)
+      msbuildArguments: '/p:Configuration=$(BuildConfiguration) 
+      $(CommonMSBuildArgs) 
+      /p:PublishType=$(PublishType) 
+      /p:SignType=$(SignType) 
+      /p:NuGetFeedUrl=$(NUGET_FEED_URL) 
+      /p:NuGetSymbolsFeedUrl=$(NUGET_SYMBOLS_FEED_URL) 
+      /p:NuGetApiKey=$(NUGET_API_KEY) 
+      /p:AzureAccountName=$(AzureAccountName) 
+      /p:ContainerName=$(ContainerName) 
+      /p:AzureAccessToken=$(AzureAccessToken) 
+      /p:ChecksumAzureAccountName=$(ChecksumAzureAccountName) 
+      /p:ChecksumContainerName=$(ChecksumContainerName) 
+      /p:ChecksumAzureAccessToken=$(ChecksumAzureAccessToken) 
+      /p:PackagesUrl=$(PackagesUrl) 
+      /p:SymbolPackagesUrl=$(SymbolPackagesUrl) 
+      /p:TransportFeedAccessToken=$(TransportFeedAccessToken) 
+      /p:OfficialPublish=true 
+      /p:GitHubUser=$(GitHubUser) 
+      /p:GitHubEmail=$(GitHubEmail) 
+      /p:GitHubAuthToken=$(GITHUB_PASSWORD) 
+      /p:VersionsRepoOwner=$(VersionsRepoOwner) 
+      /p:VersionsRepo=$(VersionsRepo) 
+      /p:VersionsRepoPath=build-info/dotnet/$(RepoName)/$(SourceBranch) 
+      /p:Finalize=true 
+      /p:SymbolServerPath=$(SymbolServerPath) 
+      /p:SymbolServerPAT=$(SymbolServerPAT) 
+      /p:SymbolExpirationInDays=$(SymbolExpirationInDays) 
+      /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\\publish.log 
+      $(AdditionalMSBuildArguments)'
+    condition: and(succeeded(), eq(variables.PublishType, 'nopublishtype'))
+- task: MSBuild@1
+  displayName: Publish via PublishType
+  inputs: 
+    solution: $(Build.SourcesDirectory)\publish\publish-type.proj
+    platform: $(TargetArchitecture)
+    configuration: $(BuildConfiguration)
+    msbuildVersion: 15.0
+    msbuildArchitecture: $(TargetArchitecture)
+    msbuildArguments: '/p:Configuration=$(BuildConfiguration) 
+    $(CommonMSBuildArgs) 
+    /p:PublishType=$(PublishType) 
+    /p:SignType=$(SignType) 
+    /p:NuGetFeedUrl=$(NUGET_FEED_URL) 
+    /p:NuGetSymbolsFeedUrl=$(NUGET_SYMBOLS_FEED_URL) 
+    /p:NuGetApiKey=$(NUGET_API_KEY) 
+    /p:AzureAccountName=$(AzureAccountName) 
+    /p:ContainerName=$(ContainerName) 
+    /p:AzureAccessToken=$(AzureAccessToken) 
+    /p:ChecksumAzureAccountName=$(ChecksumAzureAccountName) 
+    /p:ChecksumContainerName=$(ChecksumContainerName) 
+    /p:ChecksumAzureAccessToken=$(ChecksumAzureAccessToken) 
+    /p:PackagesUrl=$(PackagesUrl) 
+    /p:SymbolPackagesUrl=$(SymbolPackagesUrl) 
+    /p:TransportFeedAccessToken=$(TransportFeedAccessToken) 
+    /p:OfficialPublish=true 
+    /p:GitHubUser=$(GitHubUser) 
+    /p:GitHubEmail=$(GitHubEmail) 
+    /p:GitHubAuthToken=$(GITHUB_PASSWORD) 
+    /p:VersionsRepoOwner=$(VersionsRepoOwner) 
+    /p:VersionsRepo=$(VersionsRepo) 
+    /p:VersionsRepoPath=build-info/dotnet/$(RepoName)/$(SourceBranch) 
+    /p:Finalize=true 
+    /p:SymbolServerPath=$(SymbolServerPath) 
+    /p:SymbolServerPAT=$(SymbolServerPAT) 
+    /p:SymbolExpirationInDays=$(SymbolExpirationInDays) 
+    /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\\publish.log 
+    $(AdditionalMSBuildArguments)'
+  condition: and(succeeded(), ne(variables.PublishType, ''), eq(variables.BuildConfiguration, 'Release'))
+  - task: CopyFiles@2
+    displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: |
+        *.log
+        *.binlog
+      TargetFolder: '$(Build.StagingDirectory)\BuildLogs'
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact BuildLogs
+    inputs:
+      PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
+      ArtifactName: $(Agent.JobName)
+    continueOnError: true
+    condition: succeededOrFailed()
+  

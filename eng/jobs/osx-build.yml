@@ -1,0 +1,56 @@
+parameters:
+  pool: {}
+  variables: {}
+  strategy: {}
+
+jobs:
+- job: OSX_Build
+  pool: ${{ parameters.pool }}
+  strategy: ${{ parameters.strategy }}
+  variables: 
+    ${{ insert }}: ${{ parameters.variables }}
+    OfficialBuildId: '$(Build.BuildNumber)'
+    PublishType: ''
+    SourcesDirectory: '$(Build.SourcesDirectory)'
+  steps:
+  - script: $(SourcesDirectory)/build.sh
+      -OfficialBuildId=$(OfficialBuildId) 
+      -ConfigurationGroup=$(BuildConfiguration) 
+      $(AdditionalBuildArguments)
+      -- $(AdditionalMSBuildArguments) 
+    displayName: Build 
+    condition: succeeded()
+  - script: $(SourcesDirectory)/Tools/msbuild.sh
+      $(SourcesDirectory)/publish/publish.proj
+      /p:PublishType=$(PublishType)
+      /p:AzureAccountName=$(AzureAccountName) 
+      /p:ContainerName=$(ContainerName) 
+      /p:AzureAccessToken=$(AzureAccessToken) 
+      /p:ChecksumAzureAccountName=$(ChecksumAzureAccountName) 
+      /p:ChecksumContainerName=$(ChecksumContainerName) 
+      /p:ChecksumAzureAccessToken=$(ChecksumAzureAccessToken) 
+      /p:TargetArchitecture=$(TargetArchitecture) 
+      /p:ConfigurationGroup=$(BuildConfiguration) 
+      /p:PortableBuild=$(PortableBuild) 
+      /p:OSGroup=OSX 
+      $(AdditionalMSBuildArguments)  
+    displayName: Publish 
+    condition: and(succeeded(), eq(variables.BuildConfiguration, 'Release'))
+  - task: CopyFiles@2
+    displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: |
+        *.log
+        *.binlog
+      TargetFolder: '$(Build.StagingDirectory)\BuildLogs'
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact BuildLogs
+    inputs:
+      PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
+      ArtifactName: $(Agent.JobName)
+    continueOnError: true
+    condition: succeededOrFailed()
+  

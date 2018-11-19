@@ -1,0 +1,70 @@
+parameters:
+  pool: {}
+  variables: {}
+  strategy: {}
+  agentOS: ''
+
+jobs:
+- job: ${{ parameters.agentOS }}
+  pool: ${{ parameters.pool }}
+  strategy: ${{ parameters.strategy }}
+  variables: 
+    AdditionalMSBuildArguments: ''
+    BuildArguments: -ConfigurationGroup=$(BuildConfiguration) $(AdditionalBuildArguments)
+    DockerCommonRunArgs: '--name $(DockerContainerName) -v "$(SourcesDirectory):$(GitDirectory)" -w="$(GitDirectory)" -e "PACKAGEVERSIONPROPSURL=$(PackageVersionPropsUrl)" $(DockerImageName)'
+    DockerContainerName: $(DockerTag)
+    DockerImageName: microsoft/dotnet-buildtools-prereqs:$(DockerTag)
+    GitDirectory: '/root/coresetup'
+    OfficialBuildId: '$(Build.BuildNumber)'
+    SourcesDirectory: '$(Build.SourcesDirectory)'
+  steps:
+  - task: CmdLine@1
+    displayName: Build
+    inputs:
+      filename: docker
+      arguments: 'run --rm 
+        $(CrossBuildArgs) $(DockerCommonRunArgs) 
+        $(GitDirectory)/build.sh 
+        -OfficialBuildId=$(OfficialBuildId) 
+        $(BuildArguments) 
+        -- $(AdditionalMSBuildArguments)'
+      workingFolder: '$(SourcesDirectory)'
+  - task: CmdLine@1
+    displayName: Publish
+    inputs:
+      filename: docker
+      arguments: 'run --privileged 
+        --rm $(DockerCommonRunArgs) 
+        $(GitDirectory)/Tools/msbuild.sh 
+        $(GitDirectory)/publish/publish.proj 
+        /p:PublishType=$(PublishType) 
+        /p:AzureAccountName=$(AzureAccountName) 
+        /p:ContainerName=$(ContainerName) 
+        /p:AzureAccessToken=$(AzureAccessToken) 
+        /p:ChecksumAzureAccountName=$(ChecksumAzureAccountName) 
+        /p:ChecksumContainerName=$(ChecksumContainerName) 
+        /p:ChecksumAzureAccessToken=$(ChecksumAzureAccessToken) 
+        /p:TargetArchitecture=$(TargetArchitecture) 
+        /p:ConfigurationGroup=$(BuildConfiguration) 
+        /p:PortableBuild=$(PortableBuild) 
+        /p:OSGroup=Linux 
+        $(AdditionalMSBuildArguments)'
+      workingFolder: '$(SourcesDirectory)'
+    condition: and(succeeded(), eq(variables.BuildConfiguration, 'Release'))
+  - task: CopyFiles@2
+    displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: |
+        *.log
+        *.binlog
+      TargetFolder: '$(Build.StagingDirectory)\BuildLogs'
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact BuildLogs
+    inputs:
+      PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
+      ArtifactName: $(Agent.JobName)
+    continueOnError: true
+    condition: succeededOrFailed()

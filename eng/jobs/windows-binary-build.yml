@@ -1,0 +1,149 @@
+parameters:
+  pool: {}
+  variables: {}
+  strategy: {}
+
+jobs:
+- job: Windows_Build
+  pool: ${{ parameters.pool }}
+  strategy: ${{ parameters.strategy }}
+  variables: 
+    CommonMSBuildArgs: "/p:ConfigurationGroup=$(BuildConfiguration) /p:TargetArchitecture=$(TargetArchitecture) /p:PortableBuild=$(PortableBuild) $(AdditionalMSBuildArguments)"
+    MsbuildSigningArguments: /p:CertificateId=400 /v:detailed /p:SignType=$(SignType)
+    OfficialBuildId: '$(Build.BuildNumber)'
+  steps:
+  - script: $(Build.SourcesDirectory)\build.cmd
+      -- $(CommonMSBuildArgs)
+      /t:BuildTraversalBuildDependencies /flp:v=diag
+    displayName: Build traversal build dependencies
+    condition: succeeded()
+  - script: build.cmd
+      --src-builds 
+      -- $(CommonMSBuildArgs)
+      /p:BuildAppx=false
+    displayName: Build binaries 
+    condition: succeeded()
+  - task: MSBuild@1
+    displayName: Build nuget packaegs
+    inputs: 
+      solution: '$(Build.SourcesDirectory)\src\pkg\dir.proj'
+      msbuildVersion: 15.0
+      msbuildArchitecture: x64
+      msbuildArguments: '$(CommonMSBuildArgs) 
+      /p:BuildFullPlatformManifest=$(BuildFullPlatformManifest)
+      /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\packages.log'
+    condition: succeeded()
+  - task: MSBuild@1
+    displayName: Build sharedframework layout
+    inputs: 
+      solution: '$(Build.SourcesDirectory)\src\sharedframework\sharedframework.proj'
+      msbuildVersion: 15.0
+      msbuildArchitecture: x64
+      msbuildArguments: '$(CommonMSBuildArgs) 
+      /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\sharedframework.log'
+    condition: succeeded()
+  - task: MSBuild@1
+    displayName: Create installers
+    inputs: 
+      solution: '$(Build.SourcesDirectory)\src\pkg\packaging\dir.proj'
+      msbuildVersion: 15.0
+      msbuildArchitecture: x64
+      msbuildArguments: '/t:BuildInstallers 
+        $(CommonMSBuildArgs) 
+        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\packaging.log'
+    condition: succeeded()
+  # - task: MSBuild@1
+  #   displayName: Sign MSI and cab files
+  #   inputs: 
+  #     solution: '$(Build.SourcesDirectory)\signing\sign.proj'
+  #     msbuildVersion: 15.0
+  #     msbuildArchitecture: x64
+  #     msbuildArguments: '/t:SignMsiAndCab
+  #       $(CommonMSBuildArgs) 
+  #       $(MsbuildSigningArguments)'
+  #   condition: succeeded()
+  - task: MSBuild@1
+    displayName: Create bundles
+    inputs: 
+      solution: '$(Build.SourcesDirectory)\src\pkg\packaging\dir.proj'
+      msbuildVersion: 15.0
+      msbuildArchitecture: x64
+      msbuildArguments: '/t:BuildCombinedInstallers
+        $(CommonMSBuildArgs) 
+        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\createbundles.log'
+    condition: succeeded()
+  - task: MSBuild@1
+    displayName: Extract engine from bundle
+    inputs: 
+      solution: '$(Build.SourcesDirectory)\src\pkg\packaging\dir.proj'
+      msbuildVersion: 15.0
+      msbuildArchitecture: x64
+      msbuildArguments: '/t:ExtractEngineBundle 
+        $(CommonMSBuildArgs) 
+        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\extractengine.log'
+    condition: succeeded()
+  # - task: MSBuild@1
+  #   displayName: Sign Engine
+  #   inputs: 
+  #     solution: '$(Build.SourcesDirectory)\signing\sign.proj'
+  #     msbuildVersion: 15.0
+  #     msbuildArchitecture: x64
+  #     msbuildArguments: '/t:SignEngine 
+  #       $(CommonMSBuildArgs) 
+  #       /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\signengine.log'
+  #   condition: succeeded()
+  - task: MSBuild@1
+    displayName: Reattach engine to bundle
+    inputs: 
+      solution: '$(Build.SourcesDirectory)\src\pkg\packaging\dir.proj'
+      msbuildVersion: 15.0
+      msbuildArchitecture: x64
+      msbuildArguments: '/t:ReattachEngineToBundle  
+        $(CommonMSBuildArgs) 
+        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\reattachengine.log'
+    condition: succeeded()
+  # - task: MSBuild@1
+  #   displayName: Sign Bundle
+  #   inputs: 
+  #     solution: '$(Build.SourcesDirectory)\signing\sign.proj'
+  #     msbuildVersion: 15.0
+  #     msbuildArchitecture: x64
+  #     msbuildArguments: '/t:SignBundle  
+  #       $(CommonMSBuildArgs) 
+  #       /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\signbundle.log'
+  #   condition: succeeded()
+  - task: MSBuild@1
+    displayName: Publish
+    inputs: 
+      solution: '$(Build.SourcesDirectory)\publish\publish.proj'
+      msbuildVersion: 15.0
+      msbuildArchitecture: x64
+      msbuildArguments: '$(CommonMSBuildArgs) 
+        /p:PublishType=$(PublishType)
+        /p:AzureAccountName=$(AzureAccountName) 
+        /p:ContainerName=$(ContainerName) 
+        /p:AzureAccessToken=$(AzureAccessToken) 
+        /p:PublishRidAgnosticPackages=$(PublishRidAgnosticPackages) 
+        /p:BuildFullPlatformManifest=$(BuildFullPlatformManifest) 
+        /p:ChecksumAzureAccountName=$(ChecksumAzureAccountName) 
+        /p:ChecksumContainerName=$(ChecksumContainerName) 
+        /p:ChecksumAzureAccessToken=$(ChecksumAzureAccessToken) 
+        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\publish.log'
+    condition: and(succeeded(), eq(variables.BuildConfiguration, 'Release'))
+  - task: CopyFiles@2
+    displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)'
+      Contents: |
+        *.log
+        *.binlog
+      TargetFolder: '$(Build.StagingDirectory)\BuildLogs'
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact BuildLogs
+    inputs:
+      PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
+      ArtifactName: $(Agent.JobName)
+    continueOnError: true
+    condition: succeededOrFailed()
