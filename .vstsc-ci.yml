@@ -103,30 +103,30 @@ jobs:
           PortableBuild: true
           TargetArchitecture: arm64
     
-# - template: /eng/jobs/linux-binary-build.yml
-#   parameters:
-#     agentOS: FreeBSD
-#     pool:
-#       name: DotNetCore-Infra
-#       demands:
-#         - agent.os -equals FreeBSD
-#     strategy:
-#       maxParallel: 2
-#       matrix: 
-#         # build_linux_freebsd_x64_debug:
-#         #   AdditionalBuildArguments: "-PortableBuild=true -strip-symbols -SkipTests=$(SkipTests)"
-#         #   AdditionalMSBuildArguments: "/p:DotNetRestoreSources=$(RestoreSource) /p:StabilizePackageVersion=$(IsStable) /p:PackageVersionStamp=$(VersionStamp)"
-#         #   BuildConfiguration: Debug
-#         #   CrossBuildArgs: ''
-#         #   PortableBuild: "true"
-#         #   TargetArchitecture: "x64"
-#         build_linux_freebsd_x64_release:
-#           AdditionalBuildArguments: "-PortableBuild=true -strip-symbols -SkipTests=$(SkipTests)"
-#           AdditionalMSBuildArguments: "/p:DotNetRestoreSources=$(RestoreSource) /p:StabilizePackageVersion=$(IsStable) /p:PackageVersionStamp=$(VersionStamp)"
-#           BuildConfiguration: Release
-#           CrossBuildArgs: ''
-#           PortableBuild: "true"
-#           TargetArchitecture: "x64"
+- template: /eng/jobs/linux-binary-build.yml
+  parameters:
+    agentOS: FreeBSD
+    pool:
+      name: DotNetCore-Infra
+      demands:
+        - agent.os -equals FreeBSD
+    strategy:
+      maxParallel: 2
+      matrix: 
+        # build_linux_freebsd_x64_debug:
+        #   AdditionalBuildArguments: "-PortableBuild=true -strip-symbols -SkipTests=$(SkipTests)"
+        #   AdditionalMSBuildArguments: "/p:DotNetRestoreSources=$(RestoreSource) /p:StabilizePackageVersion=$(IsStable) /p:PackageVersionStamp=$(VersionStamp)"
+        #   BuildConfiguration: Debug
+        #   CrossBuildArgs: ''
+        #   PortableBuild: "true"
+        #   TargetArchitecture: "x64"
+        build_linux_freebsd_x64_release:
+          AdditionalBuildArguments: "-PortableBuild=true -strip-symbols -SkipTests=$(SkipTests)"
+          AdditionalMSBuildArguments: "/p:DotNetRestoreSources=$(RestoreSource) /p:StabilizePackageVersion=$(IsStable) /p:PackageVersionStamp=$(VersionStamp)"
+          BuildConfiguration: Release
+          CrossBuildArgs: ''
+          PortableBuild: "true"
+          TargetArchitecture: "x64"
 # - template: /eng/jobs/linux-package-build.yml
 #   parameters:
 #     pool:
