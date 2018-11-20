@@ -3,6 +3,8 @@ trigger:
 
 variables:
   teamName: dotnet-core
+  # clean the local repo on the build agents
+  Build.Repository.Clean: true
   SkipTests: true #TODO set to false
   RestoreSource: 
   IsStable: false

@@ -145,6 +145,6 @@ jobs:
     displayName: Publish Artifact BuildLogs
     inputs:
       PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
-      ArtifactName: $(Agent.JobName)
+      ArtifactName: $(Agent.Os)_$(Agent.JobName)
     continueOnError: true
     condition: succeededOrFailed()
