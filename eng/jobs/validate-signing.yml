@@ -1,0 +1,42 @@
+parameters:
+  pool: {}
+  variables: {}
+  strategy: {}
+
+jobs:
+- job: Windows_Build
+  pool: ${{ parameters.pool }}
+  strategy: ${{ parameters.strategy }}
+  variables: 
+    OfficialBuildId: '$(Build.BuildNumber)'
+    SourcesDirectory: $(Build.SourcesDirectory)
+  steps:
+  - script: $(SourcesDirectory)\build.cmd
+      -signing-validation 
+      -- /p:AzureAccessToken=$(AzureAccessToken) 
+      /p:AzureAccountName=$(AzureAccountName) 
+      /p:ContainerName=$(ContainerName) 
+      /p:OptionalToolSource=$(OptionalToolSource) 
+      # /p:OptionalToolSourceUser=$(OptionalToolSourceUser) 
+      # /p:OptionalToolSourcePassword=$(OptionalToolSourcePassword) 
+      /p:OfficialBuildId=$(OfficialBuildId) 
+      /flp:v=detailed 
+      /p:SignType=$(SignType) 
+      $(AdditionalMSBuildArguments) 
+  - task: CopyFiles@2
+    displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
+    inputs:
+      SourceFolder: '$(SourcesDirectory)'
+      Contents: |
+        *.log
+        Bin\SigningValidation\Logs\**
+      TargetFolder: '$(Build.StagingDirectory)\BuildLogs'
+    continueOnError: true
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact BuildLogs
+    inputs:
+      PathtoPublish: '$(Build.StagingDirectory)\BuildLogs'
+      ArtifactName: $(Agent.JobName)
+    continueOnError: true
+    condition: succeededOrFailed()
