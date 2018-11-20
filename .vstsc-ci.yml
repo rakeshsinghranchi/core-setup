@@ -3,7 +3,7 @@ trigger:
 
 variables:
   teamName: dotnet-core
-  SkipTests: true 
+  SkipTests: true #TODO set to false
   RestoreSource: 
   IsStable: false
   VersionStamp:

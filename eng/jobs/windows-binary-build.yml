@@ -11,8 +11,9 @@ jobs:
     CommonMSBuildArgs: "/p:ConfigurationGroup=$(BuildConfiguration) /p:TargetArchitecture=$(TargetArchitecture) /p:PortableBuild=$(PortableBuild) $(AdditionalMSBuildArguments)"
     MsbuildSigningArguments: /p:CertificateId=400 /v:detailed /p:SignType=$(SignType)
     OfficialBuildId: '$(Build.BuildNumber)'
+    SourcesDirectory: $(Build.SourcesDirectory)
   steps:
-  - script: $(Build.SourcesDirectory)\build.cmd
+  - script: $(SourcesDirectory)\build.cmd
       -- $(CommonMSBuildArgs)
       /t:BuildTraversalBuildDependencies /flp:v=diag
     displayName: Build traversal build dependencies
@@ -26,36 +27,36 @@ jobs:
   - task: MSBuild@1
     displayName: Build nuget packaegs
     inputs: 
-      solution: '$(Build.SourcesDirectory)\src\pkg\dir.proj'
+      solution: '$(SourcesDirectory)\src\pkg\dir.proj'
       msbuildVersion: 15.0
       msbuildArchitecture: x64
       msbuildArguments: '$(CommonMSBuildArgs) 
       /p:BuildFullPlatformManifest=$(BuildFullPlatformManifest)
-      /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\packages.log'
+      /flp:v=detailed;LogFile=$(SourcesDirectory)\packages.log'
     condition: succeeded()
   - task: MSBuild@1
     displayName: Build sharedframework layout
     inputs: 
-      solution: '$(Build.SourcesDirectory)\src\sharedframework\sharedframework.proj'
+      solution: '$(SourcesDirectory)\src\sharedframework\sharedframework.proj'
       msbuildVersion: 15.0
       msbuildArchitecture: x64
       msbuildArguments: '$(CommonMSBuildArgs) 
-      /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\sharedframework.log'
+      /flp:v=detailed;LogFile=$(SourcesDirectory)\sharedframework.log'
     condition: succeeded()
   - task: MSBuild@1
     displayName: Create installers
     inputs: 
-      solution: '$(Build.SourcesDirectory)\src\pkg\packaging\dir.proj'
+      solution: '$(SourcesDirectory)\src\pkg\packaging\dir.proj'
       msbuildVersion: 15.0
       msbuildArchitecture: x64
       msbuildArguments: '/t:BuildInstallers 
         $(CommonMSBuildArgs) 
-        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\packaging.log'
+        /flp:v=detailed;LogFile=$(SourcesDirectory)\packaging.log'
     condition: succeeded()
   # - task: MSBuild@1
   #   displayName: Sign MSI and cab files
   #   inputs: 
-  #     solution: '$(Build.SourcesDirectory)\signing\sign.proj'
+  #     solution: '$(SourcesDirectory)\signing\sign.proj'
   #     msbuildVersion: 15.0
   #     msbuildArchitecture: x64
   #     msbuildArguments: '/t:SignMsiAndCab
@@ -65,57 +66,57 @@ jobs:
   - task: MSBuild@1
     displayName: Create bundles
     inputs: 
-      solution: '$(Build.SourcesDirectory)\src\pkg\packaging\dir.proj'
+      solution: '$(SourcesDirectory)\src\pkg\packaging\dir.proj'
       msbuildVersion: 15.0
       msbuildArchitecture: x64
       msbuildArguments: '/t:BuildCombinedInstallers
         $(CommonMSBuildArgs) 
-        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\createbundles.log'
+        /flp:v=detailed;LogFile=$(SourcesDirectory)\createbundles.log'
     condition: succeeded()
   - task: MSBuild@1
     displayName: Extract engine from bundle
     inputs: 
-      solution: '$(Build.SourcesDirectory)\src\pkg\packaging\dir.proj'
+      solution: '$(SourcesDirectory)\src\pkg\packaging\dir.proj'
       msbuildVersion: 15.0
       msbuildArchitecture: x64
       msbuildArguments: '/t:ExtractEngineBundle 
         $(CommonMSBuildArgs) 
-        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\extractengine.log'
+        /flp:v=detailed;LogFile=$(SourcesDirectory)\extractengine.log'
     condition: succeeded()
   # - task: MSBuild@1
   #   displayName: Sign Engine
   #   inputs: 
-  #     solution: '$(Build.SourcesDirectory)\signing\sign.proj'
+  #     solution: '$(SourcesDirectory)\signing\sign.proj'
   #     msbuildVersion: 15.0
   #     msbuildArchitecture: x64
   #     msbuildArguments: '/t:SignEngine 
   #       $(CommonMSBuildArgs) 
-  #       /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\signengine.log'
+  #       /flp:v=detailed;LogFile=$(SourcesDirectory)\signengine.log'
   #   condition: succeeded()
   - task: MSBuild@1
     displayName: Reattach engine to bundle
     inputs: 
-      solution: '$(Build.SourcesDirectory)\src\pkg\packaging\dir.proj'
+      solution: '$(SourcesDirectory)\src\pkg\packaging\dir.proj'
       msbuildVersion: 15.0
       msbuildArchitecture: x64
       msbuildArguments: '/t:ReattachEngineToBundle  
         $(CommonMSBuildArgs) 
-        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\reattachengine.log'
+        /flp:v=detailed;LogFile=$(SourcesDirectory)\reattachengine.log'
     condition: succeeded()
   # - task: MSBuild@1
   #   displayName: Sign Bundle
   #   inputs: 
-  #     solution: '$(Build.SourcesDirectory)\signing\sign.proj'
+  #     solution: '$(SourcesDirectory)\signing\sign.proj'
   #     msbuildVersion: 15.0
   #     msbuildArchitecture: x64
   #     msbuildArguments: '/t:SignBundle  
   #       $(CommonMSBuildArgs) 
-  #       /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\signbundle.log'
+  #       /flp:v=detailed;LogFile=$(SourcesDirectory)\signbundle.log'
   #   condition: succeeded()
   - task: MSBuild@1
     displayName: Publish
     inputs: 
-      solution: '$(Build.SourcesDirectory)\publish\publish.proj'
+      solution: '$(SourcesDirectory)\publish\publish.proj'
       msbuildVersion: 15.0
       msbuildArchitecture: x64
       msbuildArguments: '$(CommonMSBuildArgs) 
@@ -128,12 +129,12 @@ jobs:
         /p:ChecksumAzureAccountName=$(ChecksumAzureAccountName) 
         /p:ChecksumContainerName=$(ChecksumContainerName) 
         /p:ChecksumAzureAccessToken=$(ChecksumAzureAccessToken) 
-        /flp:v=detailed;LogFile=$(Build.SourcesDirectory)\publish.log'
+        /flp:v=detailed;LogFile=$(SourcesDirectory)\publish.log'
     condition: and(succeeded(), eq(variables.BuildConfiguration, 'Release'))
   - task: CopyFiles@2
     displayName: Copy Files to $(Build.StagingDirectory)\BuildLogs
     inputs:
-      SourceFolder: '$(Build.SourcesDirectory)'
+      SourceFolder: '$(SourcesDirectory)'
       Contents: |
         *.log
         *.binlog

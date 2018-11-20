@@ -8,7 +8,6 @@ jobs:
   pool: ${{ parameters.pool }}
   strategy: ${{ parameters.strategy }}
   variables: 
-    ${{ insert }}: ${{ parameters.variables }}
     OfficialBuildId: '$(Build.BuildNumber)'
     PublishType: ''
     SourcesDirectory: '$(Build.SourcesDirectory)'
